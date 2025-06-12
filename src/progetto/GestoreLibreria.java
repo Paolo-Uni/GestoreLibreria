@@ -1,5 +1,6 @@
 package progetto;
 
+import progetto.ordina.Ordina;
 import progetto.repository.Repository;
 import progetto.repository.RepositoryFactory;
 
@@ -30,7 +31,7 @@ public class GestoreLibreria {
     public boolean aggiungiLibro(Libro libro) {
         if (!libri.contains(libro)) {
             libri.add(libro);
-            repository.salva(libro);
+            salvaLibri();
             return true;
         }
         return false;
@@ -45,7 +46,7 @@ public class GestoreLibreria {
             }
         }
         if (rimosso)
-            repository.salva(libri);
+            salvaLibri();
         return rimosso;
     }
 
@@ -60,7 +61,7 @@ public class GestoreLibreria {
             }
         }
         if(modificato){
-            repository.salva(libri);
+            salvaLibri();
         }
         return modificato;
     }
@@ -87,6 +88,10 @@ public class GestoreLibreria {
 
     public List<Libro> getTuttiLibri() {
         return new ArrayList<>(libri);
+    }
+
+    public List<Libro> getLibriOrdinati(Ordina strategia) {
+        return strategia.ordina(getTuttiLibri());
     }
 
     public void stampaLibreria() {

@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="liferay.fasterxml.jackson.databind" type="repository">
+    <properties maven-id="com.liferay:com.fasterxml.jackson.databind:2.10.5.1.LIFERAY-PATCHED-1" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/liferay/com.fasterxml.jackson.databind/2.10.5.1.LIFERAY-PATCHED-1/com.fasterxml.jackson.databind-2.10.5.1.LIFERAY-PATCHED-1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
