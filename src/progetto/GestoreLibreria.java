@@ -1,5 +1,6 @@
 package progetto;
 
+import progetto.filtri.Filtro;
 import progetto.ordina.Ordina;
 import progetto.repository.Repository;
 import progetto.repository.RepositoryFactory;
@@ -9,7 +10,7 @@ import java.util.*;
 public class GestoreLibreria {
 
     private static GestoreLibreria instance;
-    private final List<Libro> libri;
+    private List<Libro> libri;
     private final Repository repository;
 
     private GestoreLibreria() {
@@ -50,22 +51,6 @@ public class GestoreLibreria {
         return rimosso;
     }
 
-
-    public boolean modificaLibro(String stringa, Libro nuovoLibro) {
-        boolean modificato = false;
-        for (int i = 0; i < libri.size(); i++) {
-            if (libri.get(i).getIsbn().equals(stringa) || libri.get(i).getTitolo().equals(stringa)) {
-                libri.set(i, nuovoLibro);
-                modificato = true;
-                break;
-            }
-        }
-        if(modificato){
-            salvaLibri();
-        }
-        return modificato;
-    }
-
     public List<Libro> cercaPerTitolo(String titolo) {
         List<Libro> risultati = new ArrayList<>();
         for (Libro l : libri) {
@@ -86,12 +71,27 @@ public class GestoreLibreria {
         return risultati;
     }
 
+    public List<Libro> filtraLibri(Filtro filtro) {
+        List<Libro> risultati = new ArrayList<>();
+        for (Libro l : libri) {
+            if (filtro.verifica(l)) {
+                risultati.add(l);
+            }
+        }
+        return risultati;
+    }
+
     public List<Libro> getTuttiLibri() {
         return new ArrayList<>(libri);
     }
 
     public List<Libro> getLibriOrdinati(Ordina strategia) {
         return strategia.ordina(getTuttiLibri());
+    }
+
+    public void eliminaLibreria(){
+        libri = new ArrayList<>();
+        salvaLibri();
     }
 
     public void stampaLibreria() {
