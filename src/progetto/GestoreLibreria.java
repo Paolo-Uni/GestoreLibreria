@@ -39,13 +39,7 @@ public class GestoreLibreria {
     }
 
     public boolean rimuoviLibro(String isbn) {
-        boolean rimosso = false;
-        for (Libro libro : libri) {
-            if (libro.getIsbn().equals(isbn)) {
-                libri.remove(libro);
-                rimosso = true;
-            }
-        }
+        boolean rimosso = libri.removeIf(l -> l.getIsbn().equals(isbn));
         if (rimosso)
             salvaLibri();
         return rimosso;
@@ -72,6 +66,16 @@ public class GestoreLibreria {
     }
 
     public List<Libro> filtraLibri(Filtro filtro) {
+        List<Libro> risultati = new ArrayList<>();
+        for (Libro l : libri) {
+            if (filtro.verifica(l)) {
+                risultati.add(l);
+            }
+        }
+        return risultati;
+    }
+
+    public List<Libro> filtraLibri(List<Libro> libri, Filtro filtro) {
         List<Libro> risultati = new ArrayList<>();
         for (Libro l : libri) {
             if (filtro.verifica(l)) {
