@@ -16,6 +16,10 @@ public class Libro{
     public Libro() {}
 
     public Libro(String titolo, String autore, String isbn, String genere, int valutazione, StatoLettura statoLettura) {
+        if(valutazione < 1 || valutazione > 5)
+            throw new IllegalArgumentException("La valutazione deve essere un numero compreso tra 1 e 5.");
+        if(titolo.isEmpty() || autore.isEmpty() || isbn.isEmpty() || genere.isEmpty())
+            throw new IllegalArgumentException("Alcuni campi devono essere compilati");
         this.titolo = titolo;
         this.autore = autore;
         this.isbn = isbn;

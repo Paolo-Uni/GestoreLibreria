@@ -1,6 +1,7 @@
 package progetto;
 
 import progetto.filtri.Filtro;
+import progetto.memento.Memento;
 import progetto.ordina.Ordina;
 import progetto.repository.Repository;
 import progetto.repository.RepositoryFactory;
@@ -104,4 +105,19 @@ public class GestoreLibreria {
             System.out.println(libro);
     }
 
+    public Memento memento(){
+        ArrayList<Libro> ret = new ArrayList<>();
+        for(Libro libro : libri)
+            ret.add(new Libro(libro.getTitolo(), libro.getAutore(), libro.getIsbn(), libro.getGenere(), libro.getValutazione(), libro.getStatoLettura()));
+        return new Memento(ret);
+    }
+
+    public void setMemento(Memento m){
+        if(m != null){
+            eliminaLibreria();
+            for(Libro libro : m.getLibri())
+                aggiungiLibro(new Libro(libro.getTitolo(), libro.getAutore(), libro.getIsbn(), libro.getGenere(), libro.getValutazione(), libro.getStatoLettura()));
+            salvaLibri();
+        }
+    }
 }

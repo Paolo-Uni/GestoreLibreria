@@ -27,22 +27,12 @@ public class JsonRepository implements Repository {
         try {
             File file = new File(FILE_PATH);
             if (!file.exists()) return new ArrayList<>();
-            return mapper.readValue(file, new TypeReference<List<Libro>>() {});
+            return mapper.readValue(file, new TypeReference<>() {
+            });
         } catch (IOException e) {
             System.err.println("Errore durante il caricamento dei libri: " + e.getMessage());
             return new ArrayList<>();
         }
     }
 
-    @Override
-    public void salva(Libro libro) {
-        List<Libro> lista = carica();
-        for(Libro l : lista)
-            if (l.getIsbn().equals(libro.getIsbn())){
-                lista.remove(l);
-                break;
-            }
-        lista.add(libro);
-        salva(lista);
-    }
 }

@@ -8,8 +8,6 @@ public interface Repository {
 
     void salva(List<Libro> libri);
 
-    void salva(Libro libro);
-
     List<Libro> carica();
 
 }

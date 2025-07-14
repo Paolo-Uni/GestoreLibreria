@@ -6,6 +6,7 @@ import progetto.filtri.Filtro;
 import progetto.filtri.FiltroPerGenere;
 import progetto.filtri.FiltroPerStato;
 import progetto.filtri.FiltroPerValutazioneMinima;
+import progetto.memento.Caretaker;
 import progetto.ordina.Ordina;
 import progetto.ordina.OrdinaPerAutore;
 import progetto.ordina.OrdinaPerTitolo;
@@ -28,9 +29,11 @@ public class LibreriaGUI extends JFrame {
     private final JTextField campoRicercaAutore;
     private final JTextField campoValutazioneMinima;
     private final Map<String, Ordina> strategieOrdine;
+    private final Caretaker caretaker;
 
     public LibreriaGUI() {
         gestore = GestoreLibreria.getInstance();
+        caretaker = new Caretaker();
         strategieOrdine = Map.of(
                 "Titolo", new OrdinaPerTitolo(),
                 "Autore", new OrdinaPerAutore()
@@ -58,10 +61,12 @@ public class LibreriaGUI extends JFrame {
         JButton btnRimuovi = new JButton("Rimuovi");
         JButton btnModifica = new JButton("Modifica");
         JButton btnHome = new JButton("Home");
+        JButton btnUndo = new JButton("Annulla");
         pannelloBottoni.add(btnAggiungi);
         pannelloBottoni.add(btnRimuovi);
         pannelloBottoni.add(btnModifica);
         pannelloBottoni.add(btnHome);
+        pannelloBottoni.add(btnUndo);
         add(pannelloBottoni, BorderLayout.SOUTH);
 
         JPanel pannelloRicerca = new JPanel();
@@ -77,7 +82,7 @@ public class LibreriaGUI extends JFrame {
 
         JPanel pannelloFiltri = new JPanel();
         pannelloFiltri.setLayout(new GridLayout(0, 1));
-        filtroGenere = new JComboBox<>(new String[]{"Tutti", "Narrativa", "Saggio", "Fantasy", "Storico"});
+        filtroGenere = new JComboBox<>(new String[]{"Tutti", "Narrativa", "Saggio", "Fantasy", "Storico", "Commedia", "Romanzo", "Giallo"});
         filtroStato = new JComboBox<>(new String[]{"Tutti", "LETTO", "DA_LEGGERE", "IN_LETTURA"});
         ordinaPer = new JComboBox<>(new String[]{"Titolo", "Autore"});
         Dimension comboSize = new Dimension(120, 25);
@@ -90,14 +95,21 @@ public class LibreriaGUI extends JFrame {
         pannelloFiltri.add(new JLabel("Ordina per:")); pannelloFiltri.add(ordinaPer);
         add(pannelloFiltri, BorderLayout.WEST);
 
+        btnUndo.addActionListener(e -> {
+            gestore.setMemento(caretaker.undo());
+            aggiornaTabella();
+        });
         btnAggiungi.addActionListener(e -> {
             Libro nuovo = inputLibro(null);
             if (nuovo != null) {
+                caretaker.addMemento(gestore.memento());
                 gestore.aggiungiLibro(nuovo);
+                caretaker.addMemento(gestore.memento());
                 aggiornaTabella();
             }
         });
         btnRimuovi.addActionListener(e -> {
+            caretaker.addMemento(gestore.memento());
             int riga = tabellaLibri.getSelectedRow();
             if (riga != -1) {
                 String isbn = (String) modelloTabella.getValueAt(riga, 2);
@@ -106,6 +118,7 @@ public class LibreriaGUI extends JFrame {
             }
         });
         btnModifica.addActionListener(e -> {
+            caretaker.addMemento(gestore.memento());
             int riga = tabellaLibri.getSelectedRow();
             if (riga != -1) {
                 String isbn = (String) modelloTabella.getValueAt(riga, 2);
@@ -123,8 +136,8 @@ public class LibreriaGUI extends JFrame {
             }
         });
 
-        filtroGenere.addActionListener(e -> applicaFiltri());
-        filtroStato.addActionListener(e -> applicaFiltri());
+        filtroGenere.addActionListener(e -> aggiornaTabella());
+        filtroStato.addActionListener(e -> aggiornaTabella());
         ordinaPer.addActionListener(e -> aggiornaTabella());
         btnCerca.addActionListener(e -> applicaRicerca());
         btnHome.addActionListener(e -> {
@@ -141,7 +154,8 @@ public class LibreriaGUI extends JFrame {
         setVisible(true);
     }
 
-    private void applicaFiltri() {
+    private void aggiornaTabella() {
+
         List<Filtro> filtri = new ArrayList<>();
         String genere = (String) filtroGenere.getSelectedItem();
         if (!"Tutti".equals(genere)) filtri.add(new FiltroPerGenere(genere));
@@ -150,25 +164,13 @@ public class LibreriaGUI extends JFrame {
         if (!"Tutti".equals(stato)) filtri.add(new FiltroPerStato(Libro.StatoLettura.valueOf(stato)));
 
         List<Libro> risultati = gestore.getTuttiLibri();
+
+        Ordina strategia = strategieOrdine.get((String) ordinaPer.getSelectedItem());
+        if (strategia != null) risultati = gestore.getLibriOrdinati(strategia);
+
         for (Filtro filtro : filtri) {
             risultati = gestore.filtraLibri(risultati, filtro);
         }
-
-        campoRicercaTitolo.setText("");
-        campoRicercaAutore.setText("");
-        campoValutazioneMinima.setText("");
-
-        mostraInTabella(risultati);
-    }
-
-    private void aggiornaTabella() {
-
-        Ordina strategia = strategieOrdine.get((String) ordinaPer.getSelectedItem());
-        List<Libro> risultati = gestore.getTuttiLibri();
-        if (strategia != null) risultati = gestore.getLibriOrdinati(strategia);
-
-        filtroGenere.setSelectedIndex(0);
-        filtroStato.setSelectedIndex(0);
 
         mostraInTabella(risultati);
     }
@@ -207,8 +209,9 @@ public class LibreriaGUI extends JFrame {
         Ordina strategia = strategieOrdine.get((String) ordinaPer.getSelectedItem());
         if (strategia != null) risultati = strategia.ordina(risultati);
 
-        filtroGenere.setSelectedIndex(0);
-        filtroStato.setSelectedIndex(0);
+        campoRicercaTitolo.setText("");
+        campoRicercaAutore.setText("");
+        campoValutazioneMinima.setText("");
 
         mostraInTabella(risultati);
     }
